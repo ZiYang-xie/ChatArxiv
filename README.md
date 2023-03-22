@@ -28,3 +28,8 @@
 3. 读图：让 ChatGPT 能够识别和解释论文中的图像、图表和其他视觉内容。
 4. PDF 预览：直接在 ChatArxiv 中预览论文的完整 PDF 版本。
 5. 历史论文管理：允许用户管理他们阅读过的论文，方便回顾和进一步研究。
+
+
+## Star 历史
+
+[![Star 历史](https://api.star-history.com/svg?repos=ZiYang-xie/ChatArxiv&type=Timeline)](https://star-history.com/#ZiYang-xie/ChatArxiv&Timeline)

@@ -26,3 +26,7 @@ Currently in the very early stages of development, here are the features we plan
 3. Image reading: Enabling ChatGPT to recognize and interpret images, charts, and other visual content in papers.
 4. PDF preview: Previewing the full PDF version of the paper directly within ChatArxiv.
 5. Paper history management: Allowing users to manage the papers they have read for easy review and further research.
+
+## Star 历史
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ZiYang-xie/ChatArxiv&type=Timeline)](https://star-history.com/#ZiYang-xie/ChatArxiv&Timeline)
