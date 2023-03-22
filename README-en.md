@@ -1,5 +1,5 @@
 # ChatArxiv 📑
-`Your Personal Arxiv Paper Reading Assistant`
+### `Your Personal Arxiv Paper Reading Assistant`
 
 ![Version](https://img.shields.io/badge/Version-Beta--0.0.1-blue)
 ![issues](https://img.shields.io/github/issues/ZiYang-xie/ChatArxiv?style=plastic)
@@ -7,12 +7,12 @@
 ![stars](https://img.shields.io/github/stars/ZiYang-xie/ChatArxiv)
 ![License](https://img.shields.io/github/license/ZiYang-xie/ChatArxiv)
 
----
-
 <div style="font-size: 1rem;">
-  <a href="./README-en.md">English</a> | 
-  <a href="./README.md">中文</a> 
+  <a href="./README.md">中文</a> |
+  <a href="./README-en.md">English</a>   
 </div>
+
+---
 
 ![](./assets/pic.png)
 
