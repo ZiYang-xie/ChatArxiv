@@ -1,0 +1,8 @@
+Markdown==3.3.4
+requests==2.26.0
+arxiv==1.4.3
+fitz==0.0.1.dev2
+gradio==3.23.0
+Pillow==9.4.0
+tenacity==8.2.2
+tiktoken==0.3.2
