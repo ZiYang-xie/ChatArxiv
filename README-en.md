@@ -21,12 +21,12 @@ ChatArxiv is a project that uses ChatGPT as an Arxiv paper reading assistant. Wi
 ## Future Features
 Currently in the very early stages of development, here are the features we plan to add in future versions:
 
-1. Language switching: Allowing users to switch the interface and chat language according to their needs.
-2. Style switching: Providing users with multiple chat style options to meet different reading and learning needs.
-3. Image reading: Enabling ChatGPT to recognize and interpret images, charts, and other visual content in papers.
-4. PDF preview: Previewing the full PDF version of the paper directly within ChatArxiv.
-5. Paper history management: Allowing users to manage the papers they have read for easy review and further research.
+1. [ ] Language switching: Allowing users to switch the interface and chat language according to their needs.
+2. [ ] Style switching: Providing users with multiple chat style options to meet different reading and learning needs.
+3. [ ] Image reading: Enabling ChatGPT to recognize and interpret images, charts, and other visual content in papers.
+4. [x] PDF preview: Previewing the full PDF version of the paper directly within ChatArxiv.
+5. [ ] Paper history management: Allowing users to manage the papers they have read for easy review and further research.
 
-## Star 历史
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ZiYang-xie/ChatArxiv&type=Timeline)](https://star-history.com/#ZiYang-xie/ChatArxiv&Timeline)

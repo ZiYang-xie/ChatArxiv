@@ -1,6 +1,6 @@
 import os
 import re
-import datetime
+import numpy as np
 import tenacity
 import arxiv
 import markdown
@@ -25,51 +25,64 @@ class Reader:
                                             As a professional academic paper reviewer, you possess exceptional logical and critical thinking skills, \
                                             enabling you to provide concise and insightful responses.")
 
-        self.chat_api_list = [api.strip() for api in self.chat_api_list if len(api) > 5]
-        self.cur_api = 0
-        self.file_format = 'md' 
-        self.save_image = False
+        # Read Basic Info of the Paper 
+        self._read_basic()
 
-    def read_intro(self):
+    # Split the Prompt to fit the model's input token size
+    def _split_prompt(self, prompt, max_token):
+        usage_token = self.chatPaper.token_str(prompt)
+        if usage_token <= max_token:
+            return [str(prompt)]
+            
+        sentences = re.split(r'(?<=[。.!?])\s+', prompt)
+        result = []
+        current_prompt = ''
+        for sentence in sentences:
+            sentence = str(sentence)
+            if self.chatPaper.token_str(current_prompt + sentence) <= max_token:
+                current_prompt += sentence
+            else:
+                result.append(current_prompt.strip())
+                current_prompt = sentence
+
+        result.append(current_prompt.strip())
+        return result
+
+
+    def _read_basic(self):
         intro_key = [k for k in self.paper_instance['content'].keys()][0]
         msg_prompt = f"This is an academic paper from {self.paper_instance['categories']} fields, \
+                        Title of this paper are {self.paper_instance['title']}. \
                         Authors of this paper are {self.paper_instance['authors']}. \
                         Abstract of this paper is {self.paper_instance['abstract']}. \
                         Introduction of this paper is {self.paper_instance['content'][intro_key]}. \
                         You will be asked to answer questions about this paper. \
                         You know a lot about this field and your reply will help the reader to understand the general idea of this paper."
+        
         max_token = self.chatPaper.max_tokens
-        assert len(msg_prompt) < max_token, "System prompt is too long, you find a TOBE fixed bug"
-        self.chatPaper.add_to_conversation(
-            convo_id="chatIntro", 
-            role="assistant", 
-            message= msg_prompt
-        )
-        return "I'm Done! 😋"
+        prompt_list = self._split_prompt(msg_prompt, max_token)
+        for prompt in prompt_list:
+            self.chatPaper.add_to_conversation(
+                convo_id="chat", 
+                role="assistant", 
+                message= prompt
+            )
+        
+
+    def read_paper(self):
+        #TODO not implemented yet
+        return "我读完了，让我们开始吧! 🤩 (Under Development)"
     
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
     def chat_with_paper(self, prompt):
-        self.chatPaper.add_to_conversation(
-            convo_id="chat", 
-            role="assistant", 
-            message=str(f"This is an academic paper from {self.paper_instance['categories']} fields, \
-                          {self.paper_instance['content']}. \
-                          You know a lot about this paper and will reply any questions about this paper.")
-        )
-        pass
-
-
-    @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
-                    stop=tenacity.stop_after_attempt(5),
-                    reraise=True)
-    # Some Predefined Function
-    def chat_intro(self, prompt):
         result = self.chatPaper.ask(
             prompt = prompt,
             role="user",
-            convo_id="chatIntro",
+            convo_id="chat",
         )
         return result[0]
+
+
         

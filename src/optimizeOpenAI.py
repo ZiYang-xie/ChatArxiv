@@ -149,6 +149,7 @@ class chatPaper:
             if "content" in delta:
                 content = delta["content"]
                 yield content
+    
     def ask(self, prompt: str, role: str = "user", convo_id: str = "default", **kwargs):
         """
         Non-streaming ask
@@ -186,6 +187,7 @@ class chatPaper:
             return True
         else:
             return False
+    
     def reset(self, convo_id: str = "default", system_prompt = None):
         """
         Reset the conversation
@@ -193,6 +195,7 @@ class chatPaper:
         self.conversation[convo_id] = [
             {"role": "system", "content": str(system_prompt or self.system_prompt)},
         ]
+    
     def conversation_summary(self, convo_id: str = "default"):
         input = ""
         role = ""
@@ -219,9 +222,12 @@ class chatPaper:
             {"role": 'assistant', "content": response},
         ]
         return self.conversation[convo_id]
+    
     def token_cost(self,convo_id: str = "default"):
         return len(ENCODER.encode("\n".join([x["content"] for x in self.conversation[convo_id]])))
-    def token_str(self,content:str):
+    
+    def token_str(self, content:str):
         return len(ENCODER.encode(content))
+    
 def main():
     return
