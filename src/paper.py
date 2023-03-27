@@ -15,7 +15,7 @@ class Paper:
         self.paper_instance = {
             'title': self.paper_arxiv.title,
             'authors': self.paper_arxiv.authors,
-            'arxiv_id': self.paper_arxiv,
+            'arxiv_id': self.paper_id,
             'abstract': self.paper_arxiv.summary,
             'pdf_url': self.paper_arxiv.pdf_url,
             'categories': self.paper_arxiv.categories,
@@ -96,65 +96,49 @@ class Paper:
                 section_name_upper = section_name.upper()
                 if "Abstract" == section_name and section_name in cur_text:
                     section_page_dict[section_name] = page_index
-                else:
-                    if section_name + '\n' in cur_text:
-                        section_page_dict[section_name] = page_index
-                    elif section_name_upper + '\n' in cur_text:
-                        section_page_dict[section_name] = page_index
+                    continue
+
+                if section_name + '\n' in cur_text:
+                    section_page_dict[section_name] = page_index
+                elif section_name_upper + '\n' in cur_text:
+                    section_page_dict[section_name] = page_index
 
         self.section_page_dict = section_page_dict
 
     def _parse_paper(self):
         """
-         Return: dict { <Section Name>: <Content> }
+        Return: dict { <Section Name>: <Content> }
         """
         self._get_sections()
-        self._get_all_page_index() 
+        self._get_all_page_index()
 
-        #TODO Optimize the following code
-        text_list = []
-        section_dict = {}
         text_list = [page.get_text() for page in self.pdf]
-        for sec_index, sec_name in enumerate(self.section_page_dict):
-            if sec_index <= 0:
+        section_keys = list(self.section_page_dict.keys())
+        section_count = len(section_keys)
+
+        section_dict = {}
+        for sec_index, sec_name in enumerate(section_keys):
+            if sec_index == 0:
                 continue
-            else:
-                start_page = self.section_page_dict[sec_name]
-                if sec_index < len(list(self.section_page_dict.keys()))-1:
-                    end_page = self.section_page_dict[list(self.section_page_dict.keys())[sec_index+1]]
-                else:
-                    end_page = len(text_list)
-                cur_sec_text = ''
-                if end_page - start_page == 0:
-                    if sec_index < len(list(self.section_page_dict.keys()))-1:
-                        next_sec = list(self.section_page_dict.keys())[sec_index+1]
-                        if text_list[start_page].find(sec_name) == -1:
-                            start_i = text_list[start_page].find(sec_name.upper())
-                        else:
-                            start_i = text_list[start_page].find(sec_name)
-                        if text_list[start_page].find(next_sec) == -1:
-                            end_i = text_list[start_page].find(next_sec.upper())
-                        else:
-                            end_i = text_list[start_page].find(next_sec)                        
-                        cur_sec_text += text_list[start_page][start_i:end_i]
-                else:
-                    for page_i in range(start_page, end_page):                    
-                        if page_i == start_page:
-                            if text_list[start_page].find(sec_name) == -1:
-                                start_i = text_list[start_page].find(sec_name.upper())
-                            else:
-                                start_i = text_list[start_page].find(sec_name)
-                            cur_sec_text += text_list[page_i][start_i:]
-                        elif page_i < end_page:
-                            cur_sec_text += text_list[page_i]
-                        elif page_i == end_page:
-                            if sec_index < len(list(self.section_page_dict.keys()))-1:
-                                next_sec = list(self.section_page_dict.keys())[sec_index+1]
-                                if text_list[start_page].find(next_sec) == -1:
-                                    end_i = text_list[start_page].find(next_sec.upper())
-                                else:
-                                    end_i = text_list[start_page].find(next_sec)  
-                                cur_sec_text += text_list[page_i][:end_i]
-                section_dict[sec_name] = cur_sec_text.replace('-\n', '').replace('\n', ' ')
-        
+
+            start_page = self.section_page_dict[sec_name]
+            end_page = self.section_page_dict[section_keys[sec_index + 1]] if sec_index < section_count - 1 else len(text_list)
+
+            cur_sec_text = []
+            for page_i in range(start_page, end_page):
+                page_text = text_list[page_i]
+
+                if page_i == start_page:
+                    start_i = page_text.find(sec_name) if sec_name in page_text else page_text.find(sec_name.upper())
+                    page_text = page_text[start_i:]
+
+                if page_i == end_page - 1 and sec_index < section_count - 1:
+                    next_sec = section_keys[sec_index + 1]
+                    end_i = page_text.find(next_sec) if next_sec in page_text else page_text.find(next_sec.upper())
+                    page_text = page_text[:end_i]
+
+                cur_sec_text.append(page_text)
+
+            section_dict[sec_name] = ''.join(cur_sec_text).replace('-\n', '').replace('\n', ' ')
+
         self.paper_instance['content'] = section_dict
