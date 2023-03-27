@@ -12,7 +12,6 @@ from queue import PriorityQueue as PQ
 import json
 import os
 import time
-ENCODER = tiktoken.get_encoding("gpt2")
 
 class chatPaper:
     """
@@ -28,7 +27,7 @@ class chatPaper:
         top_p: float = 1.0,
         model_name: str = "gpt-3.5-turbo",
         reply_count: int = 1,
-        system_prompt = "You are ChatPaper, A paper reading bot",
+        system_prompt = "You are ChatArxiv, A paper reading bot",
         lastAPICallTime = time.time()-100,
         apiTimeInterval = 20,
     ) -> None:
@@ -52,6 +51,7 @@ class chatPaper:
         self.reply_count = reply_count
         self.decrease_step = 250
         self.conversation = {}
+        self.ENCODER = tiktoken.get_encoding("gpt2")
         if self.token_str(self.system_prompt) > self.max_tokens:
             raise Exception("System prompt is too long")
         self.lock = threading.Lock()
@@ -82,19 +82,19 @@ class chatPaper:
         """
         last_dialog = self.conversation[convo_id][-1]
         query = str(last_dialog['content'])
-        if(len(ENCODER.encode(str(query)))>self.max_tokens):
+        if(len(self.ENCODER.encode(str(query)))>self.max_tokens):
             query = query[:int(1.5*self.max_tokens)]
-        while(len(ENCODER.encode(str(query)))>self.max_tokens):
+        while(len(self.ENCODER.encode(str(query)))>self.max_tokens):
             query = query[:self.decrease_step]
         self.conversation[convo_id] = self.conversation[convo_id][:-1]
         full_conversation = "\n".join([str(x["content"]) for x in self.conversation[convo_id]],)
-        if len(ENCODER.encode(full_conversation)) > self.max_tokens:
+        if len(self.ENCODER.encode(full_conversation)) > self.max_tokens:
             self.conversation_summary(convo_id=convo_id)
         full_conversation = ""
         for x in self.conversation[convo_id]:
             full_conversation = str(x["content"]) + "\n" + full_conversation
         while True:
-            if (len(ENCODER.encode(full_conversation+query)) > self.max_tokens):
+            if (len(self.ENCODER.encode(full_conversation+query)) > self.max_tokens):
                 query = query[:self.decrease_step]
             else:
                 break
@@ -108,7 +108,7 @@ class chatPaper:
         convo_id: str = "default",
         **kwargs,
     ) -> Generator:
-        if convo_id not in self.conversation:
+        if convo_id not in self.conversation.keys():
             self.reset(convo_id=convo_id)
         self.add_to_conversation(prompt, "user", convo_id=convo_id)
         self.__truncate_conversation(convo_id=convo_id)
@@ -205,29 +205,29 @@ class chatPaper:
             else:
                 role = 'ChatGpt'
             input+=role+' : '+conv['content']+'\n'
-        prompt = "Your goal is to summarize the provided conversation in English. Your summary should be concise and focus on the key information to facilitate better dialogue for the large language model.Ensure that you include all necessary details and relevant information while still reducing the length of the conversation as much as possible. Your summary should be clear and easily understandable for the ChatGpt model providing a comprehensive and concise summary of the conversation."
+        prompt = "Your goal is to summarize the provided conversation. Your summary should be concise and focus on the key information to facilitate better dialogue for the large language model.Ensure that you include all necessary details and relevant information while still reducing the length of the conversation as much as possible. Your summary should be clear and easily understandable for the ChatGpt model providing a comprehensive and concise summary of the conversation."
         if(self.token_str(str(input)+prompt)>self.max_tokens):
             input = input[self.token_str(str(input))-self.max_tokens:]
         while self.token_str(str(input)+prompt)>self.max_tokens:
             input = input[self.decrease_step:]
         prompt = prompt.replace("{conversation}", input)
         self.reset(convo_id='conversationSummary')
-        response = self.ask(prompt,convo_id='conversationSummary')
+        response = self.ask(prompt, convo_id='conversationSummary')
         while self.token_str(str(response))>self.max_tokens:
             response = response[:-self.decrease_step]
-        self.reset(convo_id='conversationSummary',system_prompt='Summariaze our diaglog')
+        self.reset(convo_id='conversationSummary',system_prompt='Summariaze')
         self.conversation[convo_id] = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": "Summariaze our diaglog"},
+            {"role": "user", "content": "Summariaze"},
             {"role": 'assistant', "content": response},
         ]
         return self.conversation[convo_id]
     
     def token_cost(self,convo_id: str = "default"):
-        return len(ENCODER.encode("\n".join([x["content"] for x in self.conversation[convo_id]])))
+        return len(self.ENCODER.encode("\n".join([x["content"] for x in self.conversation[convo_id]])))
     
     def token_str(self, content:str):
-        return len(ENCODER.encode(content))
+        return len(self.ENCODER.encode(content))
     
 def main():
     return

@@ -42,6 +42,7 @@ class Paper:
             # with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
             paper_path = f'{self.paper_id}.pdf'
             dir_path = "./pdf"
+            os.makedirs(dir_path, exist_ok=True)
             save_dir = os.path.join(dir_path, paper_path)
             if not os.path.exists(save_dir):
                 paper_arxiv.download_pdf(dirpath=dir_path, filename=paper_path)

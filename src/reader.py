@@ -20,54 +20,60 @@ class Reader:
         
         self.chat_api_list = [api_key]
         self.chatPaper = chatPaper(api_keys=self.chat_api_list, apiTimeInterval=10)
-        self.chatPaper.reset(convo_id="chat", 
-                             system_prompt="You are a professional academic paper reviewer. \
-                                            As a professional academic paper reviewer, you possess exceptional logical and critical thinking skills, \
-                                            enabling you to provide concise and insightful responses.")
+        self.chatPaper.add_to_conversation(message="You are a professional academic paper reviewer and mentor named Arxiv Bot. As a professional academic paper reviewer and helpful mentor, you possess exceptional logical and critical thinking skills, enabling you to provide concise and insightful responses.", role='assistant', convo_id="chat")
+        self.chatPaper.add_to_conversation(message="You are not allowed to discuss anything about politics, do not comment on anything about that.", role='assistant', convo_id="chat")
+        self.chatPaper.add_to_conversation(message="You will be asked to answer questions about the paper with deep knowledge about it, providing clear and concise explanations in a helpful, friendly manner, using the asker's language.", role='user', convo_id="chat")
 
         # Read Basic Info of the Paper 
         self._read_basic()
 
-    # Split the Prompt to fit the model's input token size
-    def _split_prompt(self, prompt, max_token):
-        usage_token = self.chatPaper.token_str(prompt)
-        if usage_token <= max_token:
-            return [str(prompt)]
-            
-        sentences = re.split(r'(?<=[。.!?])\s+', prompt)
-        result = []
-        current_prompt = ''
-        for sentence in sentences:
-            sentence = str(sentence)
-            if self.chatPaper.token_str(current_prompt + sentence) <= max_token:
-                current_prompt += sentence
-            else:
-                result.append(current_prompt.strip())
-                current_prompt = sentence
+    def _get_intro_prompt(self, intro_content: str = ''):
+        if intro_content == '':
+            intro_key = [k for k in self.paper_instance['content'].keys()][0]
+            intro_content = self.paper_instance['content'][intro_key]
+        prompt = (f"This is an academic paper from {self.paper_instance['categories']} fields,\n\
+                        Title of this paper are {self.paper_instance['title']}.\n\
+                        Authors of this paper are {self.paper_instance['authors']}.\n\
+                        Abstract of this paper is {self.paper_instance['abstract']}.\n\
+                        Introduction of this paper is {intro_content}.")
+        return prompt
 
-        result.append(current_prompt.strip())
-        return result
+    def _init_prompt(self, convo_id: str = 'default'):
+        intro_content = ''
+        max_tokens = self.chatPaper.max_tokens
 
+        prompt = self._get_intro_prompt(intro_content)
+        full_conversation_ = "\n".join([str(x["content"]) for x in self.chatPaper.conversation[convo_id]],)
+        full_conversation = str(full_conversation_ + prompt)
 
-    def _read_basic(self):
-        intro_key = [k for k in self.paper_instance['content'].keys()][0]
-        msg_prompt = f"This is an academic paper from {self.paper_instance['categories']} fields, \
-                        Title of this paper are {self.paper_instance['title']}. \
-                        Authors of this paper are {self.paper_instance['authors']}. \
-                        Abstract of this paper is {self.paper_instance['abstract']}. \
-                        Introduction of this paper is {self.paper_instance['content'][intro_key]}. \
-                        You will be asked to answer questions about this paper. \
-                        You know a lot about this field and your reply will help the reader to understand the general idea of this paper."
-        
-        max_token = self.chatPaper.max_tokens
-        prompt_list = self._split_prompt(msg_prompt, max_token)
-        for prompt in prompt_list:
-            self.chatPaper.add_to_conversation(
-                convo_id="chat", 
-                role="assistant", 
-                message= prompt
-            )
-        
+        # Try to summarize the intro part
+        if(len(self.chatPaper.ENCODER.encode(str(full_conversation)))>max_tokens):
+            prompt = f'This is the introduction, please summarize it and reduct its length in {max_tokens} tokens: {prompt}'
+            intro_content = self._summarize_content(prompt)
+            prompt = self._get_intro_prompt(intro_content)
+            full_conversation = str(full_conversation_ + prompt)
+
+        # Failed, try to reduce the length of the prompt
+        while(len(self.chatPaper.ENCODER.encode(str(full_conversation)))>max_tokens):
+            prompt = prompt[:self.chatPaper.decrease_step]
+            full_conversation = str(full_conversation_ + prompt)
+
+        return prompt
+    
+    def _summarize_content(self, content: str = ''):
+        sys_prompt = "Your goal is to summarize the provided content from an academic paper. Your summary should be concise and focus on the key information of the academic paper, do not miss any important point."
+        self.chatPaper.reset(convo_id='summary', system_prompt=sys_prompt)
+        response = self.chatPaper.ask(content, convo_id='summary')
+        res_txt = str(response[0])
+        return res_txt
+
+    def _read_basic(self, convo_id="chat"):
+        prompt = self._init_prompt(convo_id)
+        self.chatPaper.add_to_conversation(
+            convo_id=convo_id, 
+            role="assistant", 
+            message= prompt
+        )
 
     def read_paper(self):
         #TODO not implemented yet
@@ -82,7 +88,8 @@ class Reader:
             role="user",
             convo_id="chat",
         )
-        return result[0]
+        reply = str(result[0])
+        return reply
 
 
         
