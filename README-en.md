@@ -7,9 +7,9 @@
 ![stars](https://img.shields.io/github/stars/ZiYang-xie/ChatArxiv)
 ![License](https://img.shields.io/github/license/ZiYang-xie/ChatArxiv)
 
-<div style="font-size: 1rem;">
-  <a href="./README.md">中文</a> |
-  <a href="./README-en.md">English</a>   
+<div style="font-size: 1rem;"> 
+  <a href="./README-en.md">English</a> |
+  <a href="./README.md">中文</a>
 </div>
 
 ---
