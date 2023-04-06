@@ -21,16 +21,23 @@
 
 ## 使用方法
 **安装依赖**
-```
+```bash
 pip install -r requirements.txt
 ```
 
 **启动服务**
-```
+```bash
 python app.py
 ```
 
-**基础使用**
+服务启动后, 进入浏览器对应链接即可
+
+```bash
+Running on local URL:  http://127.0.0.1:7860
+```
+
+**基础使用**  
+
 输入 OpenAI API key, 和 arxiv 论文链接，点击设置后可以进行基础提问，可以选择章节进行详细提问。
 
 ## 未来特性

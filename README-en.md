@@ -20,16 +20,17 @@ ChatArxiv is a project that uses ChatGPT as an Arxiv paper reading assistant. Wi
 
 ## Usage
 **Install Dependency**
-```
+```bash
 pip install -r requirements.txt
 ```
 
 **Launch Server**
-```
+```bash
 python app.py
 ```
 
-**Basic Usage**
+**Basic Usage**  
+
 Input OpenAI API key and arxiv link，push set basic button and here you go. You can also select multiple sections for a more detailed conversation.
 
 ## Future Features
