@@ -19,6 +19,20 @@
 
 `ChatArxiv` 📑 是一个使用 ChatGPT 作为 Arxiv 论文阅读助手的项目。通过 ChatArxiv，用户可以快速了解和理解 Arxiv 上的学术论文，降低阅读论文的时间成本。用户仅需提供自己的 `OpenAI API` 密钥和对应的 Arxiv 文章链接，即可与 ChatGPT（ArxivBot）进行交流，深入了解论文的详细内容。
 
+## 使用方法
+**安装依赖**
+```
+pip install -r requirements.txt
+```
+
+**启动服务**
+```
+python app.py
+```
+
+**基础使用**
+输入 OpenAI API key, 和 arxiv 论文链接，点击设置后可以进行基础提问，可以选择章节进行详细提问。
+
 ## 未来特性
 
 目前正处于开发的早期阶段，以下是我们计划在未来版本中添加的特性：

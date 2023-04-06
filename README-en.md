@@ -18,6 +18,20 @@
 
 ChatArxiv is a project that uses ChatGPT as an Arxiv paper reading assistant. With ChatArxiv, users can quickly understand and digest academic papers on Arxiv, reducing the time spent on reading papers. Users simply need to provide their OpenAI API key and the corresponding Arxiv article link to interact with ChatGPT (ArxivBot) and gain in-depth knowledge about the paper's details.
 
+## Usage
+**Install Dependency**
+```
+pip install -r requirements.txt
+```
+
+**Launch Server**
+```
+python app.py
+```
+
+**Basic Usage**
+Input OpenAI API key and arxiv link，push set basic button and here you go. You can also select multiple sections for a more detailed conversation.
+
 ## Future Features
 Currently in the very early stages of development, here are the features we plan to add in future versions:
 
