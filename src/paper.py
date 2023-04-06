@@ -60,31 +60,8 @@ class Paper:
         self.pdf.close()           
         
     def _get_sections(self):
-        doc = self.pdf 
-        size_font = {}
-        for page in doc:
-            text = page.get_text("dict") 
-            blocks = text["blocks"] 
-            for block in blocks: 
-                if block["type"] == 0: 
-                    block_text = block["lines"][0]["spans"][0]["text"].strip()  
-                    font_size = float(block["lines"][0]["spans"][0]["size"])
-                    if font_size not in size_font.keys():
-                        size_font[font_size] = []
-                    size_font[font_size].append(block_text)
-           
-        size_list = sorted([float(s) for s in size_font.keys()], reverse=True)
-        
-        # Auto detect the Section
-        for size in size_list:
-            # Assert the section number is large than 3
-            if len(size_font[size]) > 3:
-                self.sections = size_font[size]
-                break
-        # Auto detect failed, use predefined section
-        else: 
-            sections = 'Abstract,Introduction,Related Work,Background,Preliminary,Problem Formulation,Methods,Methodology,Method,Approach,Approaches,Materials and Methods,Experiment Settings,Experiment,Experimental Results,Evaluation,Experiments,Results,Findings,Data Analysis,Discussion,Results and Discussion,Conclusion,References'
-            self.sections = sections.split(',')
+        sections = 'Abstract,Introduction,Related Work,Background,Preliminary,Problem Formulation,Methods,Methodology,Method,Approach,Approaches,Materials and Methods,Experiment Settings,Experiment,Experimental Results,Evaluation,Experiments,Results,Findings,Data Analysis,Discussion,Results and Discussion,Conclusion,References'
+        self.sections = sections.split(',')
 
     def _get_all_page_index(self):
         section_list = self.sections

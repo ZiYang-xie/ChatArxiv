@@ -20,24 +20,24 @@ class ChatArxiv:
                       '''
         reply = "我已经阅读完论文的基本信息 😋\n您可以开始提问一些基本问题了 \n 点击 📖 Read Full Paper 让我阅读整篇论文可以提高回答质量"
         basic_info = self.reader.get_basic_info()
-        return embed_html, reply, *basic_info
+        chapter_list = self.ret_chapter_list()
+
+        return embed_html, reply, basic_info, chapter_list
     
-    def test(self):
-        self.paper.paper_instance['content'].keys()
-        import pdb; pdb.set_trace()
+    def ret_chapter_list(self):
+        chapter_ops = [str(k) for k in self.paper.paper_instance.get('content').keys()]
+        return gr.Dropdown.update(choices=chapter_ops)
     
-    def read_full(self):
+    def read_chap(self, chapter_list):
         if getattr(self, 'paper', None) is None:
             return "请先设置论文链接和 API key，点击 ⚙ Set 按钮"
-        
-        return self.reader.read_paper()
+        return self.reader.read_paper(chapter_list)
 
     def ask(self, prompt):
         return self.reader.chat_with_paper(prompt)
 
 if __name__ == '__main__':
     chatArxiv = ChatArxiv()
-
     title = "<div align='center'><h1> ChatArxiv 📑 </h1></div>"
     desc = "<div align='center'>帮助您快速阅读 Arxiv 论文</div>"
     with gr.Blocks() as app:
@@ -51,20 +51,16 @@ if __name__ == '__main__':
                 ]
                 # We do not need the ISO 639-1 language code since we interact with LLM by natural language!!
                 lang = gr.Dropdown(list(language_dict.values()), label="语言", value='中文')
-                configure_btn = gr.Button("⚙ Set Basic")
-
-                basic_info = [
-                    gr.Textbox(label="论文题目", default="", interactive=False),
-                    gr.Textbox(label="作者", default="", interactive=False),
-                ]
-                read_btn = gr.Button("📖 Read Full Paper")
+                configure_btn = gr.Button("⚙ 初始设置")
+                simple_rate = gr.Textbox(label="基本简介与评价", default="", interactive=False)
                 
                 #test_btn = gr.Button("Test Btn")
             with gr.Column(scale=1):
-                simple_rate = gr.Textbox(label="基本简介与评价", default="", interactive=False)
+                chapter_sel = gr.Dropdown(label="请选择阅读章节", multiselect=True, interactive=True)
+                read_btn = gr.Button("📖 阅读章节")
                 op_submit = gr.Textbox(label="🤖 Arxiv Bot ", default="")
                 ip_submit = gr.inputs.Textbox(label="请输入问题", default="")
-                submit_btn = gr.Button("🚀 Submit ")
+                submit_btn = gr.Button("🚀 提交 ")
 
             with gr.Column(scale=1.5):
                 embed_html = '''
@@ -79,8 +75,8 @@ if __name__ == '__main__':
                       '''
                 pdf_preview = gr.HTML(value=embed_html)
 
-        configure_btn.click(fn=chatArxiv.init, inputs=[*ip_config, lang], outputs=[pdf_preview, op_submit, *basic_info, simple_rate])
+        configure_btn.click(fn=chatArxiv.init, inputs=[*ip_config, lang], outputs=[pdf_preview, op_submit, simple_rate, chapter_sel])
         submit_btn.click(fn=chatArxiv.ask, inputs=ip_submit, outputs=op_submit)
-        read_btn.click(fn=chatArxiv.read_full, outputs=op_submit)
+        read_btn.click(fn=chatArxiv.read_chap, inputs=chapter_sel, outputs=op_submit)
         #test_btn.click(fn=chatArxiv.test)
     app.launch()

@@ -70,13 +70,7 @@ class Reader:
     def get_basic_info(self):
         prompt = f'Introduce this paper (its not necessary to include the basic information like title and author name), comment on this paper based on its abstract and introduction from its 1. Novelty, 2. Improtance, 3. Potential Influence. Relpy in {self.language}'
         basic_op = self.chatPaper.ask(prompt, convo_id='chat')[0]
-        authors = ", ".join([au.name for au in self.paper_instance['authors']])
-        basic_info = [
-            self.paper_instance['title'],
-            authors,
-            basic_op
-        ]
-        return basic_info
+        return basic_op
 
     def _read_basic(self, convo_id="chat"):
         prompt = self._init_prompt(convo_id)
@@ -86,9 +80,17 @@ class Reader:
             message= prompt
         )
 
-    def read_paper(self):
-        #TODO not implemented yet
-        return "我读完了，让我们开始吧! 🤩 (Under Development)"
+    def read_paper(self, chapter_list: list = [], convo_id="chat"):
+        for chap in chapter_list:
+            prompt = self.paper_instance['content'][chap]
+            sys_prompt = f'This is the {chap} section of this paper, please read carefully and answer the users questions professionally and friendly basic on the content.\n'
+            prompt = sys_prompt + prompt
+            self.chatPaper.add_to_conversation(
+                convo_id=convo_id, 
+                role="assistant", 
+                message= prompt
+            )
+        return "我读完了这些章节，让我们开始吧! 🤩"
         
     
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
